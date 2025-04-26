@@ -381,3 +381,262 @@ Kode diakhiri oleh `return 0` yang menandakan bahwa program telah berhasil dieks
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.20.10.png?raw=true)
 
 c. trabowo-c.c; Code Lengkap:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <string.h>
+#include <libgen.h>
+#include <time.h>
+
+int extract_number(const char *filename){
+    const char *base = basename((char *)filename);
+    int number;
+    sscanf(base, "%d_", &number); 
+    return number;
+}
+
+int cmpfunc(const void *a, const void *b){
+    const char *fa = *(const char **)a;
+    const char *fb = *(const char **)b;
+    
+    int na = extract_number(fa);
+    int nb = extract_number(fb);
+
+    return na - nb;
+}
+
+int main(){
+    char* dir_name = "/home/ubuntu/sisop_modul_2/resources/film";
+    char* FilmHorror_dir = "/home/ubuntu/sisop_modul_2/resources/FilmHorror";
+    char* FilmAnimasi_dir = "/home/ubuntu/sisop_modul_2/resources/FilmAnimasi";
+    char* FilmDrama_dir = "/home/ubuntu/sisop_modul_2/resources/FilmDrama";
+
+    if(access(FilmHorror_dir, F_OK) == 0 || access(FilmAnimasi_dir, F_OK) == 0 || access(FilmDrama_dir, F_OK) == 0){
+        printf("Folder genre film sudah dibuat.\n");
+        return 0;
+    }
+
+    if(mkdir(FilmHorror_dir, 0777) == -1){
+        printf("mkdir FilmHorror gagal.\n");
+        return 1;
+    } 
+    if(mkdir(FilmAnimasi_dir, 0777) == -1){
+        printf("mkdir FilmAnimasi gagal.\n");
+        return 2;
+    }
+    if(mkdir(FilmDrama_dir, 0777) == -1){
+        printf("mkdir FilmDrama gagal.\n");
+        return 3;
+    }
+
+    DIR *dir = opendir(dir_name);
+    if(dir == NULL){
+        printf("File unzip belum ada.\n");
+        return 4;
+    }
+
+    char *film_array[100];
+    int film_counter = 0;
+
+    struct dirent* entity;
+    entity = readdir(dir);
+
+    while(entity != NULL){
+        if(strstr(entity->d_name, ".jpg") != NULL){
+            char *path_file = malloc(512);
+            if(path_file == NULL){
+                printf("malloc gagal.\n");
+                return 5;
+            }
+
+            strcpy(path_file, dir_name);
+            strcat(path_file, "/");
+            strcat(path_file, entity->d_name);
+
+            film_array[film_counter] = path_file;
+            film_counter++;
+        }
+        entity = readdir(dir);
+    }
+    closedir(dir);
+
+    qsort(film_array, film_counter, sizeof(char *), cmpfunc);
+
+    int fd[2];
+    if(pipe(fd) == -1){
+        perror("pipe gagal.\n");
+        return 8;
+    }
+
+    pid_t pid = fork();
+
+    if(pid == 0){
+
+        int horror_count = 0, animasi_count = 0, drama_count = 0;
+
+        FILE *recap_file = fopen("/home/ubuntu/sisop_modul_2/resources/recap.txt", "a");
+        if(recap_file == NULL){
+            perror("Membuka recap.txt oleh Peddy gagal.\n");
+            return 6;
+        }
+
+        for(int i = film_counter - 1; i >= film_counter / 2; i--){
+            char *oldpath = film_array[i];
+            char newpath[512];
+            char dirpath[512];
+
+            if(strstr(film_array[i], "horror") != NULL){
+                strcpy(newpath, FilmHorror_dir);
+                strcpy(dirpath, FilmHorror_dir);
+                horror_count++;
+            }
+            else if(strstr(film_array[i], "animasi") != NULL){
+                strcpy(newpath, FilmAnimasi_dir);
+                strcpy(dirpath, FilmAnimasi_dir);
+                animasi_count++;
+            }
+            else if(strstr(film_array[i], "drama") != NULL){
+                strcpy(newpath, FilmDrama_dir);
+                strcpy(dirpath, FilmDrama_dir);
+                drama_count++;
+            }
+
+            strcat(newpath, "/");
+            strcat(newpath, basename(film_array[i]));
+
+            time_t t = time(NULL);
+            struct tm date = *localtime(&t);
+
+            if(rename(oldpath, newpath) == 0){
+                fprintf(recap_file, "[%02d-%02d-%d %02d:%02d:%02d] Peddy: %s telah dipindahkan ke %s\n", 
+                    date.tm_mday, date.tm_mon + 1, date.tm_year + 1900, date.tm_hour, date.tm_min, date.tm_sec, basename(film_array[i]), basename(dirpath));
+            }  
+            else{
+                perror("rename gagal");
+            }
+        }
+        fclose(recap_file);
+
+        close(fd[0]);  
+        int counter[3] = {horror_count, animasi_count, drama_count};
+        write(fd[1], counter, sizeof(counter)); 
+        close(fd[1]);
+    }
+    else if(pid > 0){
+
+        int horror_count = 0, animasi_count = 0, drama_count = 0;
+
+        FILE *recap_file = fopen("/home/ubuntu/sisop_modul_2/resources/recap.txt", "a");
+        if(recap_file == NULL){
+            perror("Membuka recap.txt oleh Trabowo gagal.\n");
+            return 7;
+        }
+
+        for(int i = 0; i < film_counter / 2; i++){
+                char *oldpath = film_array[i];
+                char newpath[512];
+                char dirpath[512];
+    
+                if(strstr(film_array[i], "horror") != NULL){
+                    strcpy(newpath, FilmHorror_dir);
+                    strcpy(dirpath, FilmHorror_dir);
+                    horror_count++;
+                }
+                else if(strstr(film_array[i], "animasi") != NULL){
+                    strcpy(newpath, FilmAnimasi_dir);
+                    strcpy(dirpath, FilmAnimasi_dir);
+                    animasi_count++;
+                }
+                else if(strstr(film_array[i], "drama") != NULL){
+                    strcpy(newpath, FilmDrama_dir);
+                    strcpy(dirpath, FilmDrama_dir);
+                    drama_count++;
+                }
+    
+                strcat(newpath, "/");
+                strcat(newpath, basename(film_array[i]));
+    
+                time_t t = time(NULL);
+                struct tm date = *localtime(&t);
+
+                if(rename(oldpath, newpath) == 0){
+                    fprintf(recap_file, "[%02d-%02d-%d %02d:%02d:%02d] Trabowo: %s telah dipindahkan ke %s\n", 
+                        date.tm_mday, date.tm_mon + 1, date.tm_year + 1900, date.tm_hour, date.tm_min, date.tm_sec, basename(film_array[i]), basename(dirpath));
+                } 
+                else{
+                    perror("rename gagal");
+                }
+
+        }
+        fclose(recap_file);
+
+        wait(NULL);
+
+        close(fd[1]);  
+        int counter[3];
+        read(fd[0], counter, sizeof(counter)); 
+        close(fd[0]);
+
+        FILE *total_file = fopen("/home/ubuntu/sisop_modul_2/resources/total.txt", "a");
+        if(recap_file == NULL){
+            perror("Membuka total.txt gagal.\n");
+            return 9;
+        }
+
+        int horror_total = horror_count + counter[0];
+        int animasi_total = animasi_count + counter[1];
+        int drama_total = drama_count + counter[2];
+
+        fprintf(total_file, "Jumlah film horror: %d\n", horror_total);
+        fprintf(total_file, "Jumlah film animasi: %d\n", animasi_total);
+        fprintf(total_file, "Jumlah film drama: %d\n", drama_total);
+        
+        if(horror_total > animasi_total && horror_total > drama_total){
+            fprintf(total_file, "Genre dengan jumlah film terbanyak: horror\n");
+        }
+        else if(animasi_total > drama_total){
+            fprintf(total_file, "Genre dengan jumlah film terbanyak: animasi\n");
+        }
+        else{
+            fprintf(total_file, "Genre dengan jumlah film terbanyak: drama\n");
+
+        }
+
+        fclose(recap_file);
+    }
+    else{
+        perror("fork gagal.\n");
+        return 10;
+    }
+
+    return 0;
+}
+```
+
+Penjelasan:
+
+
+### Foto Hasil Output
+
+Sebelum:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.03.08.png?raw=true)
+
+Eksekusi program:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.25.36.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.25.48.png?raw=true)
+
+Sesudah:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.27.04.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.38.30.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.27.15.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.27.28.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.27.36.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.34.37.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.35.54.png?raw=true)
+
+d. trabowo-d.c; Code Lengkap:
