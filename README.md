@@ -165,7 +165,7 @@ if(pid == 0){
     exit(1);
 }
 ```
-Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai 0 (```pid == 0```), maka bagian ini akan dijalankan oleh proses anak atau _child_. Setelahnya akan dipanggil fungsi  ```execlp()``` yang digunakan untuk mengeksekusi perintah ```wget``` agar _file_ dari _URL_ yang diberikan (```download_link```) dapat diunduh. Argumen ```-O``` pada ```wget``` adalah opsi untuk menentukan _output_ file, artinya hasil unduhan tidak akan disimpan dengan nama _default_ dari _URL_, tetapi langsung disimpan ke _path_ yang ditentukan oleh ```zip_file```. Jika ```execlp()``` gagal dieksekusi, maka fungsi ```perror()``` akan mencetak pesan kesalahan, dan ```exit(1)``` digunakan untuk menghentikan proses anak dengan status ```1```, yang menandakan adanya _error_.
+Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai 0 (```pid == 0```), maka bagian ini akan dijalankan oleh proses anak atau _child_. Di argumen pertama, akan dipanggil fungsi  ```execlp()``` yang digunakan untuk mengeksekusi perintah ```wget``` agar _file_ dari _URL_ yang diberikan dapat diunduh. Argumen kedua adalah nama perintah itu sendiri (```wget```). Argumen selanjutnya, ```download_link```, adalah _URL_ dari _file_ yang akan diunduh dan argumen terakhir merupakan opsi ```-O``` yang digunakan untuk menentukan _output_ file, artinya hasil unduhan tidak akan disimpan dengan nama _default_ dari _URL_, tetapi langsung disimpan ke _path_ yang ditentukan oleh ```zip_file```. Jika ```execlp()``` gagal dieksekusi, maka fungsi ```perror()``` akan mencetak pesan kesalahan, dan ```exit(1)``` digunakan untuk menghentikan proses anak dengan status ```1```, yang menandakan adanya _error_.
 
 ```c
 else if(pid > 0){
@@ -190,9 +190,12 @@ else{
 }
 ```
 Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` tidak bernilai 0 atau lebih dari 0 (```pid < 0```), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi ```perror()```, kemudian program akan dihentikan dengan ```return 2``` sebagai tanda adanya kegagalan. (Nilai ```return``` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
+
 ```c
 pid_t pid = fork();
 ```
+Setelah penggandaan proses atau _forking_ pertama selesai dengan tujuan melakukan mengunduh _file ZIP_ menggunakan perintah `wget`, bagian kode ini akan melakukan ```forking``` untuk yang kedua kalinya.
+
 ```c
 if(pid == 0){
     execlp("unzip", "unzip", zip_file, "-d", unzip_dir, NULL);
@@ -200,6 +203,8 @@ if(pid == 0){
     exit(1);
 }
 ```
+Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai 0 (```pid == 0```), maka bagian ini akan dijalankan oleh proses anak atau _child_. Di argumen pertama, akan dipanggil fungsi  ```execlp()``` untuk mengeksekusi perintah ```unzip``` agar _file ZIP_ yang sudah diundah bisa diekstrak (_unzip_) ke direktori tujuan yang ditentukan dalam variabel ```unzip_dir```. Argumen kedua adalah nama perintah itu sendiri (```unzip```). Argumen selanjutnya, ```zip_file```, adalah _file ZIP_ yang akan diekstrak dan argumen terakhir merupakan opsi ```-d``` yang digunakan untuk menunjukkan direktori tujuan tempat _file_ yang akan diekstrak. Jika ```execlp()``` gagal dieksekusi, maka fungsi ```perror()``` akan mencetak pesan kesalahan, dan ```exit(1)``` digunakan untuk menghentikan proses anak dengan status ```1```, yang menandakan adanya _error_.
+
 ```c
 else if(pid > 0){
     int flag;
@@ -214,15 +219,21 @@ else if(pid > 0){
     }
 }
 ```
+Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai lebih dari 0 (```pid > 0```), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Di awal, _parent_ menunggu proses anak selesai menggunakan ```waitpid()```, yang akan menyimpan status keluar proses anak ke dalam variabel ```flag```. Fungsi ```WIFEXITED(flag)``` memeriksa apakah proses anak telah keluar secara normal, dan ```WEXITSTATUS(flag) == 0``` memastikan bahwa proses keluar dengan status 0, artinya tidak ada _error_. Jika kedua kondisi terpenuhi, maka pesan ```"Unzip berhasil."``` akan ditampilkan. Namun jika tidak, maka dicetak ```"Unzip gagal."``` dan program dihentikan dengan ```return 3``` sebagai tanda adanya kegagalan.
+
 ```c
 else{
     perror("fork gagal.\n");
     return 4;
 }
 ```
+Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` tidak bernilai 0 atau lebih dari 0 (```pid < 0```), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi ```perror()```, kemudian program akan dihentikan dengan ```return 4``` sebagai tanda adanya kegagalan. 
+
 ```c
 return 0;
 ```
+Kode diakhiri oleh ```return 0``` yang menandakan bahwa program telah berhasil dieksekusi tanpa _error_.
+
 ### Foto Hasil Output
 
 ![image alt]()
