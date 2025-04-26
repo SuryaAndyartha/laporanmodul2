@@ -148,12 +148,16 @@ if(access(check_dir, F_OK) == 0){
     return 0;
 }
 ```
+Potongan kode ini berfungsi untuk memeriksa apakah _folder_ hasil ekstrak (```check_dir```) sudah ada atau belum menggunakan fungsi ```access()``` dengan parameter ```F_OK```. Jika _folder_ tersebut ditemukan atau sudah bisa diakses (```access()``` mengembalikan 0), maka program mencetak pesan ```"Folder unzip sudah ada."``` dan langsung berhenti dengan ```return 0```, yang menandakan bahwa program selesai dengan sukses tanpa perlu melakukan proses _download_ dan/atau ekstrak ulang.
+
 ```c
 if(access(zip_file, F_OK) != 0){
     pid_t pid = fork();
     ...
 }
 ```
+Di sisi lain, jika _folder_ ```check_dir``` tidak bisa ditemukan atau diakses (```access() tidak mengambalikan 0```), maka program akan membuat proses baru menggunakan fungsi ```fork()```. ```fork()``` akan menggandakan proses: satu untuk _parent_ dan satu untuk _child_. 
+
 ```c
 if(pid == 0){
     execlp("wget", "wget", download_link, "-O", zip_file, NULL);
@@ -161,6 +165,8 @@ if(pid == 0){
     exit(1);
 }
 ```
+Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai 0 (```pid == 0```), maka bagian ini akan dijalankan oleh proses anak atau _child_. Setelahnya akan dipanggil fungsi  ```execlp()``` yang digunakan untuk mengeksekusi perintah ```wget``` agar _file_ dari _URL_ yang diberikan (```download_link```) dapat diunduh. Argumen ```-O``` pada ```wget``` adalah opsi untuk menentukan _output_ file, artinya hasil unduhan tidak akan disimpan dengan nama _default_ dari _URL_, tetapi langsung disimpan ke _path_ yang ditentukan oleh ```zip_file```. Jika ```execlp()``` gagal dieksekusi, maka fungsi ```perror()``` akan mencetak pesan kesalahan, dan ```exit(1)``` digunakan untuk menghentikan proses anak dengan status ```1```, yang menandakan adanya _error_.
+
 ```c
 else if(pid > 0){
     int flag;
@@ -175,12 +181,15 @@ else if(pid > 0){
     }
 }
 ```
+Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai lebih dari 0 (```pid > 0```), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Di awal, _parent_ menunggu proses anak selesai menggunakan ```waitpid()```, yang akan menyimpan status keluar proses anak ke dalam variabel ```flag```. Fungsi ```WIFEXITED(flag)``` memeriksa apakah proses anak telah keluar secara normal, dan ```WEXITSTATUS(flag) == 0``` memastikan bahwa proses keluar dengan status 0, artinya tidak ada _error_. Jika kedua kondisi terpenuhi, maka pesan ```"Download berhasil."``` akan ditampilkan. Namun jika tidak, maka dicetak ```"Download gagal."``` dan program dihentikan dengan ```return 1``` sebagai tanda adanya kegagalan.
+
 ```c
 else{
     perror("fork gagal.\n");
     return 2;
 }
 ```
+Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` tidak bernilai 0 atau lebih dari 0 (```pid < 0```), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi ```perror()```, kemudian program akan dihentikan dengan ```return 2``` sebagai tanda adanya kegagalan. (Nilai ```return``` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
 ```c
 pid_t pid = fork();
 ```
