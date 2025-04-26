@@ -236,6 +236,13 @@ Kode diakhiri oleh ```return 0``` yang menandakan bahwa program telah berhasil d
 
 ### Foto Hasil Output
 
-![image alt]()
+Sebelum:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.01.41.png?raw=true)
 
+Eksekusi program:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.02.11.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.02.34.png?raw=true)
+
+Sesudah:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.03.08.png?raw=true)
 b. trabowo-b.c; Code Lengkap:
