@@ -49,9 +49,9 @@ Setelah semua film tertata dengan rapi dan dikelompokkan dalam direktori masing-
 
 ### Penyelesaian
 
-a. minute5_log.sh; Code Lengkap:
+a. trabowo-a.c; Code Lengkap:
 
-```C
+```c
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -121,3 +121,101 @@ int main(){
     return 0;
 }
 ```
+Penjelasan:
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+```
+Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. ```#include <stdio.h>``` menyediakan akses ke fungsi ```printf```. ```#include <unistd.h>``` memberikan akses ke fungsi ```fork```, ```execlp```, dan ```access```. ```#include <sys/wait.h>``` menyediakan fungsi ```waitpid```, ```WIFEXITED```, dan ```WEXITSTATUS```. ```#include <stdlib.h>``` menyediakan fungsi ```exit``` dan ```perror```.
+
+```c
+int main(){
+    char *zip_file = "/home/ubuntu/sisop_modul_2/resources/film.zip";
+    char *unzip_dir = "/home/ubuntu/sisop_modul_2/resources";
+    char *check_dir = "/home/ubuntu/sisop_modul_2/resources/film";
+    char *download_link = "https://drive.google.com/uc?export=download&id=1nP5kjCi9ReDk5ILgnM7UCnrQwFH67Z9B";
+    ...
+}
+```
+```int main(){...}``` adalah fungsi utama yang menjadi titik masuk eksekusi program. Di dalamnya, program dimulai dan dieksekusi.
+Setelahnya, terdapat bagian yang mendeklarasikan variabel-variabel sebagai _pointer_ dari tipe data ```char```. ```zip_file``` menyimpan _path_ lengkap ke _file ZIP_ yang akan diunduh, yaitu ```film.zip```. ```unzip_dir``` adalah direktori tempat _file ZIP_ tersebut akan diekstrak setelah diunduh. ```check_dir``` adalah _path_ ke direktori yang akan digunakan untuk memeriksa apakah direktori sudah ada atau belum. ```download_link``` berisi _URL_ untuk mengunduh _file ZIP_ dari _Google Drive_. 
+
+```c
+if(access(check_dir, F_OK) == 0){
+    printf("Folder unzip sudah ada.\n");
+    return 0;
+}
+```
+```c
+if(access(zip_file, F_OK) != 0){
+    pid_t pid = fork();
+    ...
+}
+```
+```c
+if(pid == 0){
+    execlp("wget", "wget", download_link, "-O", zip_file, NULL);
+    perror("execlp gagal.\n");
+    exit(1);
+}
+```
+```c
+else if(pid > 0){
+    int flag;
+    waitpid(pid, &flag, 0);
+                
+    if(WIFEXITED(flag) && WEXITSTATUS(flag) == 0){
+        printf("Download berhasil.\n");
+    }
+    else{
+        printf("Download gagal.\n");
+        return 1;
+    }
+}
+```
+```c
+else{
+    perror("fork gagal.\n");
+    return 2;
+}
+```
+```c
+pid_t pid = fork();
+```
+```c
+if(pid == 0){
+    execlp("unzip", "unzip", zip_file, "-d", unzip_dir, NULL);
+    perror("execlp gagal.\n");
+    exit(1);
+}
+```
+```c
+else if(pid > 0){
+    int flag;
+    waitpid(pid, &flag, 0);
+
+    if(WIFEXITED(flag) && WEXITSTATUS(flag) == 0){
+        printf("Unzip berhasil.\n");
+    }
+    else {
+        printf("Unzip gagal.\n");
+        return 3;
+    }
+}
+```
+```c
+else{
+    perror("fork gagal.\n");
+    return 4;
+}
+```
+```c
+return 0;
+```
+### Foto Hasil Output
+
+![image alt]()
+
+b. trabowo-b.c; Code Lengkap:
