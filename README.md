@@ -130,7 +130,7 @@ Penjelasan:
 #include <sys/wait.h>
 #include <stdlib.h>
 ```
-Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. ```#include <stdio.h>``` menyediakan akses ke fungsi ```printf```. ```#include <unistd.h>``` memberikan akses ke fungsi ```fork```, ```execlp```, dan ```access```. ```#include <sys/wait.h>``` menyediakan fungsi ```waitpid```, ```WIFEXITED```, dan ```WEXITSTATUS```. ```#include <stdlib.h>``` menyediakan fungsi ```exit``` dan ```perror```.
+Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. `#include <stdio.h>` menyediakan akses ke fungsi `printf`. `#include <unistd.h>` memberikan akses ke fungsi `fork`, `execlp`, dan `access`. `#include <sys/wait.h>` menyediakan fungsi `waitpid`, `WIFEXITED`, dan `WEXITSTATUS`. `#include <stdlib.h>` menyediakan fungsi `exit` dan `perror`.
 
 ```c
 int main(){
@@ -141,8 +141,8 @@ int main(){
     ...
 }
 ```
-```int main(){...}``` adalah fungsi utama yang menjadi titik masuk eksekusi program. Di dalamnya, program dimulai dan dieksekusi.
-Setelahnya, terdapat bagian yang mendeklarasikan variabel-variabel sebagai _pointer_ dari tipe data ```char```. ```zip_file``` menyimpan _path_ lengkap ke _file ZIP_ yang akan diunduh, yaitu ```film.zip```. ```unzip_dir``` adalah direktori tempat _file ZIP_ tersebut akan diekstrak setelah diunduh. ```check_dir``` adalah _path_ ke direktori yang akan digunakan untuk memeriksa apakah direktori sudah ada atau belum. ```download_link``` berisi _URL_ untuk mengunduh _file ZIP_ dari _Google Drive_. 
+`int main(){...}` adalah fungsi utama yang menjadi titik masuk eksekusi program. Di dalamnya, program dimulai dan dieksekusi.
+Setelahnya, terdapat bagian yang mendeklarasikan variabel-variabel sebagai _pointer_ dari tipe data `char`. `zip_file` menyimpan _path_ lengkap ke _file ZIP_ yang akan diunduh, yaitu `film.zip`. `unzip_dir` adalah direktori tempat _file ZIP_ tersebut akan diekstrak setelah diunduh. `check_dir` adalah _path_ ke direktori yang akan digunakan untuk memeriksa apakah direktori sudah ada atau belum. `download_link` berisi _URL_ untuk mengunduh _file ZIP_ dari _Google Drive_. 
 
 ```c
 if(access(check_dir, F_OK) == 0){
@@ -150,7 +150,7 @@ if(access(check_dir, F_OK) == 0){
     return 0;
 }
 ```
-Potongan kode ini berfungsi untuk memeriksa apakah _folder_ hasil ekstrak (```check_dir```) sudah ada atau belum menggunakan fungsi ```access()``` dengan parameter ```F_OK```. Jika _folder_ tersebut ditemukan atau sudah bisa diakses (```access()``` mengembalikan 0), maka program mencetak pesan ```"Folder unzip sudah ada."``` dan langsung berhenti dengan ```return 0```, yang menandakan bahwa program selesai dengan sukses tanpa perlu melakukan proses _download_ dan/atau ekstrak ulang.
+Potongan kode ini berfungsi untuk memeriksa apakah _folder_ hasil ekstrak (`check_dir`) sudah ada atau belum menggunakan fungsi `access()` dengan parameter `F_OK`. Jika _folder_ tersebut ditemukan atau sudah bisa diakses (`access()` mengembalikan 0), maka program mencetak pesan `"Folder unzip sudah ada."` dan langsung berhenti dengan `return 0`, yang menandakan bahwa program selesai dengan sukses tanpa perlu melakukan proses _download_ dan/atau ekstrak ulang.
 
 ```c
 if(access(zip_file, F_OK) != 0){
@@ -158,7 +158,7 @@ if(access(zip_file, F_OK) != 0){
     ...
 }
 ```
-Di sisi lain, jika _folder_ ```check_dir``` tidak bisa ditemukan atau diakses (```access() tidak mengambalikan 0```), maka program akan membuat proses baru menggunakan fungsi ```fork()```. ```fork()``` akan menggandakan proses: satu untuk _parent_ dan satu untuk _child_. 
+Di sisi lain, jika _folder_ `check_dir` tidak bisa ditemukan atau diakses (`access() tidak mengambalikan 0`), maka program akan membuat proses baru menggunakan fungsi `fork()`. `fork()` akan menggandakan proses: satu untuk _parent_ dan satu untuk _child_. 
 
 ```c
 if(pid == 0){
@@ -167,7 +167,7 @@ if(pid == 0){
     exit(1);
 }
 ```
-Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai 0 (```pid == 0```), maka bagian ini akan dijalankan oleh proses anak atau _child_. Di argumen pertama, akan dipanggil fungsi  ```execlp()``` yang digunakan untuk mengeksekusi perintah ```wget``` agar _file_ dari _URL_ yang diberikan dapat diunduh. Argumen kedua adalah nama perintah itu sendiri (```wget```). Argumen selanjutnya, ```download_link```, adalah _URL_ dari _file_ yang akan diunduh dan argumen terakhir merupakan opsi ```-O``` yang digunakan untuk menentukan _output_ file, artinya hasil unduhan tidak akan disimpan dengan nama _default_ dari _URL_, tetapi langsung disimpan ke _path_ yang ditentukan oleh ```zip_file```. Jika ```execlp()``` gagal dieksekusi, maka fungsi ```perror()``` akan mencetak pesan kesalahan, dan ```exit(1)``` digunakan untuk menghentikan proses anak dengan status ```1```, yang menandakan adanya _error_.
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka bagian ini akan dijalankan oleh proses anak atau _child_. Di argumen pertama, akan dipanggil fungsi  `execlp()` yang digunakan untuk mengeksekusi perintah `wget` agar _file_ dari _URL_ yang diberikan dapat diunduh. Argumen kedua adalah nama perintah itu sendiri (`wget`). Argumen selanjutnya, `download_link`, adalah _URL_ dari _file_ yang akan diunduh dan argumen terakhir merupakan opsi `-O` yang digunakan untuk menentukan _output_ file, artinya hasil unduhan tidak akan disimpan dengan nama _default_ dari _URL_, tetapi langsung disimpan ke _path_ yang ditentukan oleh `zip_file`. Jika `execlp()` gagal dieksekusi, maka fungsi `perror()` akan mencetak pesan kesalahan, dan `exit(1)` digunakan untuk menghentikan proses anak dengan status `1`, yang menandakan adanya _error_.
 
 ```c
 else if(pid > 0){
@@ -183,7 +183,7 @@ else if(pid > 0){
     }
 }
 ```
-Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai lebih dari 0 (```pid > 0```), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Di awal, _parent_ menunggu proses anak selesai menggunakan ```waitpid()```, yang akan menyimpan status keluar proses anak ke dalam variabel ```flag```. Fungsi ```WIFEXITED(flag)``` memeriksa apakah proses anak telah keluar secara normal, dan ```WEXITSTATUS(flag) == 0``` memastikan bahwa proses keluar dengan status 0, artinya tidak ada _error_. Jika kedua kondisi terpenuhi, maka pesan ```"Download berhasil."``` akan ditampilkan. Namun jika tidak, maka dicetak ```"Download gagal."``` dan program dihentikan dengan ```return 1``` sebagai tanda adanya kegagalan.
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai lebih dari 0 (`pid > 0`), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Di awal, _parent_ menunggu proses anak selesai menggunakan `waitpid()`, yang akan menyimpan status keluar proses anak ke dalam variabel `flag`. Fungsi `WIFEXITED(flag)` memeriksa apakah proses anak telah keluar secara normal, dan `WEXITSTATUS(flag) == 0` memastikan bahwa proses keluar dengan status 0, artinya tidak ada _error_. Jika kedua kondisi terpenuhi, maka pesan `"Download berhasil."` akan ditampilkan. Namun jika tidak, maka dicetak `"Download gagal."` dan program dihentikan dengan `return 1` sebagai tanda adanya kegagalan.
 
 ```c
 else{
@@ -191,12 +191,12 @@ else{
     return 2;
 }
 ```
-Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` tidak bernilai 0 atau lebih dari 0 (```pid < 0```), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi ```perror()```, kemudian program akan dihentikan dengan ```return 2``` sebagai tanda adanya kegagalan. (Nilai ```return``` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
+Jika `pid` yang dikembalikan oleh fungsi `fork()` tidak bernilai 0 atau lebih dari 0 (`pid < 0`), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi `perror()`, kemudian program akan dihentikan dengan `return 2` sebagai tanda adanya kegagalan. (Nilai `return` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
 
 ```c
 pid_t pid = fork();
 ```
-Setelah penggandaan proses atau _forking_ pertama selesai dengan tujuan melakukan mengunduh _file ZIP_ menggunakan perintah `wget`, bagian kode ini akan melakukan ```forking``` untuk yang kedua kalinya.
+Setelah penggandaan proses atau _forking_ pertama selesai dengan tujuan melakukan mengunduh _file ZIP_ menggunakan perintah `wget`, bagian kode ini akan melakukan `forking` untuk yang kedua kalinya.
 
 ```c
 if(pid == 0){
@@ -205,7 +205,7 @@ if(pid == 0){
     exit(1);
 }
 ```
-Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai 0 (```pid == 0```), maka bagian ini akan dijalankan oleh proses anak atau _child_. Di argumen pertama, akan dipanggil fungsi  ```execlp()``` untuk mengeksekusi perintah ```unzip``` agar _file ZIP_ yang sudah diundah bisa diekstrak (_unzip_) ke direktori tujuan yang ditentukan dalam variabel ```unzip_dir```. Argumen kedua adalah nama perintah itu sendiri (```unzip```). Argumen selanjutnya, ```zip_file```, adalah _file ZIP_ yang akan diekstrak dan argumen terakhir merupakan opsi ```-d``` yang digunakan untuk menunjukkan direktori tujuan tempat _file_ yang akan diekstrak. Jika ```execlp()``` gagal dieksekusi, maka fungsi ```perror()``` akan mencetak pesan kesalahan, dan ```exit(1)``` digunakan untuk menghentikan proses anak dengan status ```1```, yang menandakan adanya _error_.
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka bagian ini akan dijalankan oleh proses anak atau _child_. Di argumen pertama, akan dipanggil fungsi  `execlp()` untuk mengeksekusi perintah `unzip` agar _file ZIP_ yang sudah diundah bisa diekstrak (_unzip_) ke direktori tujuan yang ditentukan dalam variabel `unzip_dir`. Argumen kedua adalah nama perintah itu sendiri (`unzip`). Argumen selanjutnya, `zip_file`, adalah _file ZIP_ yang akan diekstrak dan argumen terakhir merupakan opsi `-d` yang digunakan untuk menunjukkan direktori tujuan tempat _file_ yang akan diekstrak. Jika `execlp()` gagal dieksekusi, maka fungsi `perror()` akan mencetak pesan kesalahan, dan `exit(1)` digunakan untuk menghentikan proses anak dengan status `1`, yang menandakan adanya _error_.
 
 ```c
 else if(pid > 0){
@@ -221,7 +221,7 @@ else if(pid > 0){
     }
 }
 ```
-Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` bernilai lebih dari 0 (```pid > 0```), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Di awal, _parent_ menunggu proses anak selesai menggunakan ```waitpid()```, yang akan menyimpan status keluar proses anak ke dalam variabel ```flag```. Fungsi ```WIFEXITED(flag)``` memeriksa apakah proses anak telah keluar secara normal, dan ```WEXITSTATUS(flag) == 0``` memastikan bahwa proses keluar dengan status 0, artinya tidak ada _error_. Jika kedua kondisi terpenuhi, maka pesan ```"Unzip berhasil."``` akan ditampilkan. Namun jika tidak, maka dicetak ```"Unzip gagal."``` dan program dihentikan dengan ```return 3``` sebagai tanda adanya kegagalan.
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai lebih dari 0 (`pid > 0`), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Di awal, _parent_ menunggu proses anak selesai menggunakan `waitpid()`, yang akan menyimpan status keluar proses anak ke dalam variabel `flag`. Fungsi `WIFEXITED(flag)` memeriksa apakah proses anak telah keluar secara normal, dan `WEXITSTATUS(flag) == 0` memastikan bahwa proses keluar dengan status 0, artinya tidak ada _error_. Jika kedua kondisi terpenuhi, maka pesan `"Unzip berhasil."` akan ditampilkan. Namun jika tidak, maka dicetak `"Unzip gagal."` dan program dihentikan dengan `return 3` sebagai tanda adanya kegagalan.
 
 ```c
 else{
@@ -229,12 +229,12 @@ else{
     return 4;
 }
 ```
-Jika ```pid``` yang dikembalikan oleh fungsi ```fork()``` tidak bernilai 0 atau lebih dari 0 (```pid < 0```), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi ```perror()```, kemudian program akan dihentikan dengan ```return 4``` sebagai tanda adanya kegagalan. 
+Jika `pid` yang dikembalikan oleh fungsi `fork()` tidak bernilai 0 atau lebih dari 0 (`pid < 0`), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi `perror()`, kemudian program akan dihentikan dengan `return 4` sebagai tanda adanya kegagalan. 
 
 ```c
 return 0;
 ```
-Kode diakhiri oleh ```return 0``` yang menandakan bahwa program telah berhasil dieksekusi tanpa _error_.
+Kode diakhiri oleh `return 0` yang menandakan bahwa program telah berhasil dieksekusi tanpa _error_.
 
 ### Foto Hasil Output
 
@@ -304,6 +304,7 @@ Penjelasan:
 #include <time.h>
 #include <string.h>
 ```
+Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. `#include <stdio.h>` menyediakan akses ke fungsi `printf`. `#include <stdlib.h>` menyediakan akses ke fungsi `rand`. `#include <dirent.h>` menyediakan akses ke fungsi `opendir`, `readdir`, dan `closedir`. `#include <time.h>` menyediakan akses ke fungsi `time`. `#include <string.h>` menyediakan akses ke fungsi `strstr`.
 
 ```c
 int main(){
@@ -311,6 +312,8 @@ int main(){
     ...
 }
 ```
+`int main(){...}` adalah fungsi utama yang menjadi titik masuk eksekusi program. Di dalamnya, program dimulai dan dieksekusi.
+Setelahnya, terdapat bagian yang mendeklarasikan variabel-variabel sebagai _pointer_ dari tipe data `char`. `dir_name` menyimpan _path_ lengkap ke direktori yang akan diakses/dibuka untuk dilakukan pemeriksaan.
 
 ```c
 DIR *dir = opendir(dir_name);
@@ -319,16 +322,19 @@ if(dir == NULL){
     return 1;
 }
 ```
+Bagian kode ini digunakan untuk membuka direktori yang telah ditentukan dalam variabel `dir_name` menggunakan fungsi `opendir()`. `opendir()` mengembalikan pointer ke tipe data `DIR`. Jika `opendir()` gagal membuka direktori (misalnya karena direktori tidak ada atau tidak dapat diakses), maka nilai yang dikembalikan adalah `NULL`. Dalam kasus ini, program mencetak pesan `"File unzip belum ada."` menggunakan `printf()` dan menghentikan eksekusi program dengan `return 1` sebagai tanda adanya kegagalan.
 
 ```c
 char *film_array[100];
 int film_counter = 0;
 ```
+Di sini, dilakukan deklarasi sebuah _array_ `film_array` yang berukuran `100` elemen dengan tipe data `char*`, yang masing-masing elemen akan menyimpan _pointer_ ke _string_. _Array_ ini digunakan untuk menyimpan nama-nama _file_ film yang ditemukan dalam direktori. Variabel `film_counter` diinisialisasi dengan nilai `0`, yang akan digunakan untuk menghitung jumlah _file_ film (dalam hal ini file dengan ekstensi .jpg).
 
 ```c
 struct dirent* entity;
 entity = readdir(dir);
 ```
+Potongan kode ini mendeklarasikan sebuah _pointer_ `entity` bertipe `struct dirent`, yang digunakan untuk menyimpan informasi tentang entri dalam direktori. Kemudian, dilakukan pemanggilan fungsi `readdir()` untuk membaca entri pertama dalam direktori yang akan disimpan ke `entity`. Pemanggilan fungsi dilakukan oleh `entity = readdir(dir)`.
 
 ```c
  while(entity != NULL){
@@ -339,33 +345,39 @@ entity = readdir(dir);
     entity = readdir(dir);
 }
 ```
+Pada bagian ini, terjadi perulangan atau _loop_ menggunakan `while()`. _Looping_ akan terus berjalan selama `entity` tidak bernilai `NULL` (masih ada entri di dalam direktori). Di dalam _loop_, fungsi `strstr()` digunakan untuk memeriksa apakah nama _file_ yang ada pada `entity->d_name` mengandung _substring_ `".jpg"`. Jika ditemukan, nama _file_ tersebut disimpan dalam _array_ `film_array` pada indeks `film_counter`, dan variabel `film_counter` akan bertambah 1 untuk menghitung jumlah _file_ yang ditemukan. Setelah itu, terjadi pemanggilan ulang fungsi `readdir()` oleh `entity = readdir(dir)` untuk memproses entri berikutnya. 
 
 ```c
 closedir(dir);
 ```
-
+Fungsi `closedir()` digunakan untuk menutup direktori yang sebelumnya dibuka `opendir()` sehingga tidak ada kebocoran memori atau masalah lain yang mungkin muncul. 
+ 
 ```c
 if(film_counter == 0){
     printf("Folder film kosong.\n");
     return 2;
 }
 ```
+Jika nilai dari variabel `film_counter` ternyata 0 (`film_counter == 0`) setelah perulangan selesai, maka dapat disimpulkan bahwa direktori yang diakses kosong. Pesan kesalahan akan dicetak oleh fungsi `printf()`, kemudian program akan dihentikan dengan `return 2` sebagai tanda adanya kegagalan. (Nilai `return` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
 
 ```c
 srand(time(NULL));
 int index = rand() % film_counter;
 ```
+Pertama-tama, kode akan memanggil fungsi `srand()` yang digunakan untuk menginisialisasi generator angka acak dengan nilai yang dihasilkan dari waktu saat ini. Waktu saat ini bisa diperoleh melalui `time(NULL)` (fungsi ini akan mengembalikan jumlah detik yang telah berlalu sejak 1 Januari 1970 sehingga bisa dipastikan bahwa angka yang dihasilkan berbeda setiap kali program dijalankan). Kemudian, `int index = rand() % film_counter`; menghasilkan angka acak dalam rentang dari 0 hingga film_counter - 1 dengan menggunakan operator `modulo (%)`, dengan cara ini, bisa dipastikan bahwa rentang angka yang dihasilkan oleh fungsi `srand()` hanya berkisar di antara indeks jumlah _file_ pada direktori.
 
 ```c
 printf("Film for Trabowo & Peddy: '%s'\n", film_array[index]);
 ```
+Setelah sebuah _file_ dari direktori terpilih secara acak, maka akan dicetak menggunakan fungsi `printf()` sesuai dengan format yang telah ditentukan, yaitu `Film for Trabowo & Peddy: ‘<no_namafilm_genre.jpg>’`.
 
 ```c
 return 0;
 ```
+Kode diakhiri oleh `return 0` yang menandakan bahwa program telah berhasil dieksekusi tanpa _error_.
 
 ### Foto Hasil Output
 
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.20.10.png?raw=true)
 
-b. trabowo-c.c; Code Lengkap:
+c. trabowo-c.c; Code Lengkap:
