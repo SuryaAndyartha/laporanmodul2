@@ -121,7 +121,9 @@ int main(){
     return 0;
 }
 ```
+
 Penjelasan:
+
 ```c
 #include <stdio.h>
 #include <unistd.h>
@@ -245,4 +247,125 @@ Eksekusi program:
 
 Sesudah:
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.03.08.png?raw=true)
+
 b. trabowo-b.c; Code Lengkap:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <time.h>
+#include <string.h>
+
+int main(){
+    char* dir_name = "/home/ubuntu/sisop_modul_2/resources/film";
+
+    DIR *dir = opendir(dir_name);
+    if(dir == NULL){
+        printf("File unzip belum ada.\n");
+        return 1;
+    }
+
+    char *film_array[100];
+    int film_counter = 0;
+
+    struct dirent* entity;
+    entity = readdir(dir);
+    while(entity != NULL){
+        if(strstr(entity->d_name, ".jpg") != NULL){
+            film_array[film_counter] = entity->d_name;
+            film_counter++;
+        }
+        entity = readdir(dir);
+    }
+
+    closedir(dir);
+
+    if(film_counter == 0){
+        printf("Folder film kosong.\n");
+        return 2;
+    }
+
+    srand(time(NULL));
+    int index = rand() % film_counter;
+
+    printf("Film for Trabowo & Peddy: '%s'\n", film_array[index]);
+
+    return 0;
+}
+```
+
+Penjelasan:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <time.h>
+#include <string.h>
+```
+
+```c
+int main(){
+    char* dir_name = "/home/ubuntu/sisop_modul_2/resources/film";
+    ...
+}
+```
+
+```c
+DIR *dir = opendir(dir_name);
+if(dir == NULL){
+    printf("File unzip belum ada.\n");
+    return 1;
+}
+```
+
+```c
+char *film_array[100];
+int film_counter = 0;
+```
+
+```c
+struct dirent* entity;
+entity = readdir(dir);
+```
+
+```c
+ while(entity != NULL){
+    if(strstr(entity->d_name, ".jpg") != NULL){
+        film_array[film_counter] = entity->d_name;
+        film_counter++;
+    }
+    entity = readdir(dir);
+}
+```
+
+```c
+closedir(dir);
+```
+
+```c
+if(film_counter == 0){
+    printf("Folder film kosong.\n");
+    return 2;
+}
+```
+
+```c
+srand(time(NULL));
+int index = rand() % film_counter;
+```
+
+```c
+printf("Film for Trabowo & Peddy: '%s'\n", film_array[index]);
+```
+
+```c
+return 0;
+```
+
+### Foto Hasil Output
+
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.20.10.png?raw=true)
+
+b. trabowo-c.c; Code Lengkap:
