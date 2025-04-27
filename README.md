@@ -49,7 +49,7 @@ Setelah semua film tertata dengan rapi dan dikelompokkan dalam direktori masing-
 
 ### Penyelesaian
 
-a. trabowo-a.c; Code Lengkap:
+### a. trabowo-a.c; Code Lengkap:
 
 ```c
 #include <stdio.h>
@@ -122,7 +122,7 @@ int main(){
 }
 ```
 
-Penjelasan:
+### Penjelasan:
 
 ```c
 #include <stdio.h>
@@ -248,7 +248,7 @@ Eksekusi program:
 Sesudah:
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.03.08.png?raw=true)
 
-b. trabowo-b.c; Code Lengkap:
+### b. trabowo-b.c; Code Lengkap:
 
 ```c
 #include <stdio.h>
@@ -295,7 +295,7 @@ int main(){
 }
 ```
 
-Penjelasan:
+### Penjelasan:
 
 ```c
 #include <stdio.h>
@@ -380,7 +380,7 @@ Kode diakhiri oleh `return 0` yang menandakan bahwa program telah berhasil dieks
 
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2015.20.10.png?raw=true)
 
-c. trabowo-c.c; Code Lengkap:
+### c. trabowo-c.c; Code Lengkap:
 
 ```c
 #include <stdio.h>
@@ -618,7 +618,7 @@ int main(){
 }
 ```
 
-Penjelasan:
+### Penjelasan:
 
 ```c
 #include <stdio.h>
@@ -1009,7 +1009,7 @@ Sesudah:
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.34.37.png?raw=true)
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.35.54.png?raw=true)
 
-d. trabowo-d.c; Code Lengkap:
+### d. trabowo-d.c; Code Lengkap:
 
 ```c
 #include <stdio.h>
@@ -1117,7 +1117,7 @@ int main(){
 }
 ```
 
-Penjelasan:
+### Penjelasan:
 
 ```c
 
