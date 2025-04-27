@@ -583,7 +583,7 @@ int main(){
         close(fd[0]);
 
         FILE *total_file = fopen("/home/ubuntu/sisop_modul_2/resources/total.txt", "a");
-        if(recap_file == NULL){
+        if(total_file == NULL){
             perror("Membuka total.txt gagal.\n");
             return 9;
         }
@@ -607,7 +607,7 @@ int main(){
 
         }
 
-        fclose(recap_file);
+        fclose(total_file);
     }
     else{
         perror("fork gagal.\n");
@@ -733,7 +733,7 @@ while(entity != NULL){
     entity = readdir(dir);
 }
 ```
-Pada bagian ini, terjadi perulangan atau _loop_ menggunakan `while()`. _Looping_ akan terus berjalan selama `entity` tidak bernilai `NULL` (masih ada entri di dalam direktori). Di dalam _loop_, fungsi `strstr()` digunakan untuk memeriksa apakah nama _file_ yang ada pada `entity->d_name` mengandung _substring_ `".jpg"`. Jika kondisi tersebut terpenuhi, maka program akan mengalokasikan memori untuk menyimpan _path file_ dengan `malloc(512)`. Jika alokasi memori gagal (ditandai dengan `path_file` bernilai `NULL)`, program akan mencetak pesan kesalahan dan menghentikan program dengan `return 5`. Setelah itu, `strcpy` digunakan untuk menyalin _path_ direktori ke `path_file`, diikuti dengan `strcat` untuk menambahkan simbol `/` dan nama _file_ yang ditemukan pada direktori. _Path_ lengkap file kemudian disimpan ke dalam _array_ `film_array` pada indeks yang sesuai dengan `film_counter`, yang kemudian dilakukan _increment_. Setelah itu, terjadi pemanggilan ulang fungsi `readdir()` oleh `entity = readdir(dir)` untuk memproses entri berikutnya. 
+Pada bagian ini, terjadi perulangan atau _loop_ menggunakan `while()`. _Looping_ akan terus berjalan selama `entity` tidak bernilai `NULL` (masih ada entri di dalam direktori). Di dalam _loop_, fungsi `strstr()` digunakan untuk memeriksa apakah nama _file_ yang ada pada `entity->d_name` mengandung _substring_ `".jpg"`. Jika kondisi tersebut terpenuhi, maka program akan mengalokasikan memori untuk menyimpan _path file_ dengan `malloc(512)`. Jika alokasi memori gagal (ditandai dengan `path_file` bernilai `NULL)`, program akan mencetak pesan kesalahan dan menghentikan program dengan `return 5`. Setelah itu, `strcpy` digunakan untuk menyalin _path_ direktori ke `path_file`, diikuti dengan `strcat` untuk menambahkan simbol `/` dan nama _file_ yang ditemukan pada direktori (`entity->d_name`). _Path_ lengkap file kemudian disimpan ke dalam _array_ `film_array` pada indeks yang sesuai dengan `film_counter`, yang kemudian dilakukan _increment_. Setelah itu, terjadi pemanggilan ulang fungsi `readdir()` oleh `entity = readdir(dir)` untuk memproses entri berikutnya. 
 
 ```c
 closedir(dir)
@@ -769,7 +769,8 @@ Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka 
    - ```c
      int horror_count = 0, animasi_count = 0, drama_count = 0;
      ```
-     [penjelasan]
+     Hal pertama yang dilakukan proses anak adalah mendeklarasi dan menginisialisasi variabel penghitung atau _counter_ (`horror_count`, `animasi_count`, `drama_count`) dari masing-masing genre sebagai 0.
+     
    - ```c
      FILE *recap_file = fopen("/home/ubuntu/sisop_modul_2/resources/recap.txt", "a");
      if(recap_file == NULL){
@@ -777,7 +778,8 @@ Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka 
          return 6;
      }
      ```
-     [penjelasan]
+     Proses anak akan membuka _file_ `recap.txt` dalam mode _append_ (`"a"`) menggunakan fungsi `fopen()`. Mode _append_ memungkinkan data ditulis ke akhir file tanpa menghapus isi yang sudah ada sebelumnya. Jika _file_ gagal dibuka, maka `fopen()` akan mengembalikan `NULL` dan program akan mencetak pesan kesalahan dengan menggunakan `perror`, serta mengembalikan nilai dengan `return 6`.
+     
    - ```c
      for(int i = film_counter - 1; i >= film_counter / 2; i--){
          char *oldpath = film_array[i];
@@ -786,7 +788,8 @@ Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka 
          ...
      }
      ```
-     [penjelasan]
+     Proses anak akan melakukan perulangan atau _looping_ menggunakan `for()`. Proses anak diperankan oleh `Peddy` sehingga indeks `i` akan dimulai dari akhir sampai ke tengah dengan indeks _decrement_ (di soal, `Peddy` melakukan pemindahan _file_ dari belakang ke tengah). Di awal _loop_, dilakukan deklarasi dan inisialisasi beberapa variabel. `oldpath` akan menyimpan _path_ lama _file_ dari _array_ `film_array[i]` yang akan dipindahkan. `newpath[512]` akan menyimpan _path_ baru tempat _file_ akan dipindahkan. `dirpath[512]` untuk menyimpan _path_ direktori saja (bukan _file_) untuk penulisan format yang akan dijelaskan lebih lanjut.
+     
    - ```c
      if(strstr(film_array[i], "horror") != NULL){
          strcpy(newpath, FilmHorror_dir);
@@ -804,17 +807,20 @@ Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka 
          drama_count++;
      }
      ```
-     [penjelasan]
+     Proses anak akan memeriksa genre film berdasarkan nama _file_ menggunakan fungsi `strstr()`. Jika `strstr()` tidak mengembalikan nilai `NULL`, artinya nama _file_ yang sedang diperiksa mengandung kata dari genre masing-masing dan _path_ dari _file_ tersebut akan disimpan ke `newpath` menggunakan fungsi `strcpy()`. `dirpath` juga diisi dengan _path_ tersebut untuk format penulisan lebih lanjut. Setelah itu variabel penghitung `<nama_genre>_count` akan bertambah. 
+     
    - ```c
      strcat(newpath, "/");
      strcat(newpath, basename(film_array[i]));
      ```
-     [penjelasan]
+     Setelah proses anak menemukan _file_ yang sesuai dengan genrenya, maka _path_ yang sudah disimpan pada `newpath` akan ditambahkan simbol `/` serta `basename` dari `film_array[i]` (pada indeks ke-i) untuk mendapatkan nama _file_ saja dari _path_ lengkap. Dengan begini, program sudah memiliki _path_ batu sebagai tujuan dari _file_ yang akan dipindahkan. 
+
    - ```c
      time_t t = time(NULL);
      struct tm date = *localtime(&t);
      ```
-     [penjelasan]
+     Variabel `t` bertipe `time_t` akan dideklarasi dan diisi oleh nilai yang dikembalikan oleh pemanggilan fungsi `time()`. `time(NULL)` akan mengembalikan waktu saat ini dalam format `epoch time` (jumlah detik sejak 1 Januari 1970). Fungsi `localtime(&t)` kemudian akan dipanggil untuk mengonversi waktu `epoch` (dalam `t`) menjadi waktu lokal dalam format `struct tm`. Operator `*` digunakan untuk mendereferensikan hasil `localtime()` yang berupa pointer, sehingga data waktu yang sudah dikonversi disalin ke dalam variabel date bertipe `struct tm`.
+     
    - ```c
      if(rename(oldpath, newpath) == 0){
          fprintf(recap_file, "[%02d-%02d-%d %02d:%02d:%02d] Peddy: %s telah dipindahkan ke %s\n", 
@@ -824,18 +830,20 @@ Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka 
          perror("rename gagal");
      }
      ```
-     [penjelasan]
+     Bagian kode ini akan memindahkan _file_ dari `oldpath` ke `newpath` menggunakan fungsi `rename()`. Jika operasi pemindahan _file_ berhasil (dengan nilai kembalian 0), maka program akan mencatat informasi pemindahan tersebut ke dalam _file_ `recap.txt` menggunakan `fprintf()`. Format waktu yang dicatat sudah disesuaikan dengan ketentuan, yaitu `[hari-bulan-tahun jam:menit:detik]`, penambahan `date.tm_mon` dengan `1` atau `date.tm_year` dengan `1900` dilakukan untuk membuat format waktu sesuai berdasarkan manual dari bahasa `C`. Jika pemindahan _file_ gagal (nilai kembalian bukan 0), maka program akan mencetak pesan kesalahan dengan menggunakan `perror()`. Di sini, `dirpath` digunakan supaya dalam format penulisan program mampu mendapatkan nama direktori menggunakan `basename`.
+     
    - ```c
      fclose(recap_file);
      ```
-     [penjelasan]
+     Fungsi `fclose()` akan menutup _file_ `recap.txt` yang sebelumnya dibuka agar tidak ada kebocoran sumber daya atau hal yang tidak diiginkan lainnya.
+     
    - ```c
      close(fd[0]);  
      int counter[3] = {horror_count, animasi_count, drama_count};
      write(fd[1], counter, sizeof(counter)); 
      close(fd[1]);
      ```
-     [penjelasan]
+     Proses anak akan mengirimkan data melalui `pipe` (_file descriptor_ `fd[0]` dan `fd[1]` sudah dibuka sebelumnya). `close(fd[0])` bertujuan untuk menutup _file descriptor_ yang digunakan untuk membaca data dari `pipe` karena proses anak hanya akan mengirimkan data sehingga pembacaan tidak diperlukan. `int counter[3]` akan diisi oleh variabel penghitung masing-masing genre (`horror_count`, `animasi_count`, `drama_count`). Fungsi `write(fd[1], counter, sizeof(counter))` digunakan untuk menulis data ke `pipe`. Parameter pertama, `fd[1]`, adalah _file descriptor_ untuk menulis ke `pipe`, sementara parameter kedua, `counter`, adalah data yang akan ditulis. Parameter ketiga, `sizeof(counter)`, menentukan jumlah _byte_ yang akan ditulis, yang dalam hal ini adalah ukuran _array counter_. Dengan demikian, fungsi ini mengirimkan data dari _array counter_ ke `pipe` untuk diterima oleh proses lainnya. `close(fd[1])` akan menutup _file descriptor_ pengirim data dan data selesai dikirim.
 
 ```c
 if(pid > 0){
@@ -843,6 +851,145 @@ if(pid > 0){
 }
 ```
 Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai lebih dari 0 (`pid > 0`), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Proses induk akan melakukan:
+
+   - ```c
+     int horror_count = 0, animasi_count = 0, drama_count = 0;
+     ```
+     Hal pertama yang dilakukan proses induk adalah mendeklarasi dan menginisialisasi variabel penghitung atau _counter_ (`horror_count`, `animasi_count`, `drama_count`) dari masing-masing genre sebagai 0.
+     
+   - ```c
+     FILE *recap_file = fopen("/home/ubuntu/sisop_modul_2/resources/recap.txt", "a");
+     if(recap_file == NULL){
+         perror("Membuka recap.txt oleh Trabowo gagal.\n");
+         return 7;
+     }
+     ```
+     Proses induk akan membuka _file_ `recap.txt` dalam mode _append_ (`"a"`) menggunakan fungsi `fopen()`. Mode _append_ memungkinkan data ditulis ke akhir file tanpa menghapus isi yang sudah ada sebelumnya. Jika _file_ gagal dibuka, maka `fopen()` akan mengembalikan `NULL` dan program akan mencetak pesan kesalahan dengan menggunakan `perror`, serta mengembalikan nilai dengan `return 7`.
+     
+   - ```c
+     for(int i = 0; i < film_counter / 2; i++){
+        char *oldpath = film_array[i];
+        char newpath[512];
+        char dirpath[512];
+     ...
+     }
+     ```
+     Proses induk akan melakukan perulangan atau _looping_ menggunakan `for()`. Proses induk diperankan oleh `Trabowo` sehingga indeks `i` akan dimulai dari awal sampai ke tengah dengan indeks _increment_ (di soal, `Trabowo` melakukan pemindahan _file_ dari depan ke tengah). Di awal _loop_, dilakukan deklarasi dan inisialisasi beberapa variabel. `oldpath` akan menyimpan _path_ lama _file_ dari _array_ `film_array[i]` yang akan dipindahkan. `newpath[512]` akan menyimpan _path_ baru tempat _file_ akan dipindahkan. `dirpath[512]` untuk menyimpan _path_ direktori saja (bukan _file_) untuk penulisan format yang akan dijelaskan lebih lanjut.
+     
+   - ```c
+     if(strstr(film_array[i], "horror") != NULL){
+         strcpy(newpath, FilmHorror_dir);
+         strcpy(dirpath, FilmHorror_dir);
+         horror_count++;
+     }
+     else if(strstr(film_array[i], "animasi") != NULL){
+         strcpy(newpath, FilmAnimasi_dir);
+         strcpy(dirpath, FilmAnimasi_dir);
+         animasi_count++;
+     }
+     else if(strstr(film_array[i], "drama") != NULL){
+         strcpy(newpath, FilmDrama_dir);
+         strcpy(dirpath, FilmDrama_dir);
+         drama_count++;
+     }
+     ```
+     Proses induk akan memeriksa genre film berdasarkan nama _file_ menggunakan fungsi `strstr()`. Jika `strstr()` tidak mengembalikan nilai `NULL`, artinya nama _file_ yang sedang diperiksa mengandung kata dari genre masing-masing dan _path_ dari _file_ tersebut akan disimpan ke `newpath` menggunakan fungsi `strcpy()`. `dirpath` juga diisi dengan _path_ tersebut untuk format penulisan lebih lanjut. Setelah itu variabel penghitung `<nama_genre>_count` akan bertambah. 
+     
+   - ```c
+     strcat(newpath, "/");
+     strcat(newpath, basename(film_array[i]));
+     ```
+     Setelah proses induk menemukan _file_ yang sesuai dengan genrenya, maka _path_ yang sudah disimpan pada `newpath` akan ditambahkan simbol `/` serta `basename` dari `film_array[i]` (pada indeks ke-i) untuk mendapatkan nama _file_ saja dari _path_ lengkap. Dengan begini, program sudah memiliki _path_ batu sebagai tujuan dari _file_ yang akan dipindahkan. 
+
+   - ```c
+     time_t t = time(NULL);
+     struct tm date = *localtime(&t);
+     ```
+     Variabel `t` bertipe `time_t` akan dideklarasi dan diisi oleh nilai yang dikembalikan oleh pemanggilan fungsi `time()`. `time(NULL)` akan mengembalikan waktu saat ini dalam format `epoch time` (jumlah detik sejak 1 Januari 1970). Fungsi `localtime(&t)` kemudian akan dipanggil untuk mengonversi waktu `epoch` (dalam `t`) menjadi waktu lokal dalam format `struct tm`. Operator `*` digunakan untuk mendereferensikan hasil `localtime()` yang berupa pointer, sehingga data waktu yang sudah dikonversi disalin ke dalam variabel date bertipe `struct tm`.
+     
+   - ```c
+     if(rename(oldpath, newpath) == 0){
+         fprintf(recap_file, "[%02d-%02d-%d %02d:%02d:%02d] Peddy: %s telah dipindahkan ke %s\n", 
+             date.tm_mday, date.tm_mon + 1, date.tm_year + 1900, date.tm_hour, date.tm_min, date.tm_sec, basename(film_array[i]), basename(dirpath));
+     }  
+     else{
+         perror("rename gagal");
+     }
+     ```
+     Bagian kode ini akan memindahkan _file_ dari `oldpath` ke `newpath` menggunakan fungsi `rename()`. Jika operasi pemindahan _file_ berhasil (dengan nilai kembalian 0), maka program akan mencatat informasi pemindahan tersebut ke dalam _file_ `recap.txt` menggunakan `fprintf()`. Format waktu yang dicatat sudah disesuaikan dengan ketentuan, yaitu `[hari-bulan-tahun jam:menit:detik]`, penambahan `date.tm_mon` dengan `1` atau `date.tm_year` dengan `1900` dilakukan untuk membuat format waktu sesuai berdasarkan manual dari bahasa `C`. Jika pemindahan _file_ gagal (nilai kembalian bukan 0), maka program akan mencetak pesan kesalahan dengan menggunakan `perror()`. Di sini, `dirpath` digunakan supaya dalam format penulisan program mampu mendapatkan nama direktori menggunakan `basename`.
+     
+   - ```c
+     fclose(recap_file);
+     ```
+     Fungsi `fclose()` akan menutup _file_ `recap.txt` yang sebelumnya dibuka agar tidak ada kebocoran sumber daya atau hal yang tidak diiginkan lainnya.
+
+   - ```c
+     wait(NULL);
+     ```
+     Fungsi `wait()` digunakan untuk membuat proses induk menunggu hingga proses anak selesai dieksekusi sebelum melanjutkan eksekusi selanjutnya. Parameter `NULL` berarti kita tidak perlu mengetahui status pengembalian. Dengan begini, proses anak dan induk (`Peddy` dan `Trabowo`) bisa melakukan pemindahan dan perhitungan _file_ secara bersamaan, tetapi proses induk bisa memastikan bahwa jumlah total _file_ dari proses anak bisa didapatkan secara maksimal dengan menunggunya selesai menghitung terlebih dahulu sebelum melakukan proses lebih lanjut. (Proses anak harus mengirimkan data _counter_ kepada proses induk)
+     
+   - ```c
+     close(fd[1]);  
+     int counter[3];
+     read(fd[0], counter, sizeof(counter)); 
+     close(fd[0]);
+     ```
+     Proses induk akan membaca data dari `pipe` (_file descriptor_ `fd[0]` dan `fd[1]` sudah dibuka sebelumnya). `close(fd[1])` bertujuan untuk menutup _file descriptor_ yang digunakan untuk mengirimkan data ke `pipe` karena proses induk hanya akan membaca data sehingga pengiriman tidak diperlukan. `int counter[3]` telah diisi oleh variabel penghitung masing-masing genre (`horror_count`, `animasi_count`, `drama_count`) pada proses anak. Fungsi `read(fd[0], counter, sizeof(counter))` digunakan untuk membaca data dari `pipe`. Parameter pertama, `fd[0]`, adalah _file descriptor_ untuk membaca dari `pipe`, sementara parameter kedua, `counter`, adalah data yang akan dibaca. Parameter ketiga, `sizeof(counter)`, menentukan jumlah _byte_ yang akan dibaca, yang dalam hal ini adalah ukuran _array counter_. Dengan demikian, fungsi ini mendapatkan data dari _array counter_ melalui `pipe` yang sudah dikirimkan oleh proses lainnya. `close(fd[0])` akan menutup _file descriptor_ pembaca data dan data selesai dibaca.
+
+   - ```c
+     FILE *total_file = fopen("/home/ubuntu/sisop_modul_2/resources/total.txt", "a");
+     if(total_file == NULL){
+         perror("Membuka total.txt gagal.\n");
+         return 9;
+     }
+     ```
+     Proses induk akan membuka _file_ `total.txt` dalam mode _append_ (`"a"`) menggunakan fungsi `fopen()`. Mode _append_ memungkinkan data ditulis ke akhir file tanpa menghapus isi yang sudah ada sebelumnya. Jika _file_ gagal dibuka, maka `fopen()` akan mengembalikan `NULL` dan program akan mencetak pesan kesalahan dengan menggunakan `perror`, serta mengembalikan nilai dengan `return 9`.
+
+   - ```c
+     int horror_total = horror_count + counter[0];
+     int animasi_total = animasi_count + counter[1];
+     int drama_total = drama_count + counter[2];
+     ```
+     Proses induk akan melakukan deklarasi beberapa variabel penghitung total jumlah _file_ dari masing-masing genre. Variabel total tersebut diisi oleh variabel `<nama_genre>_count` yang merupakan hasil perhitungan proses induk itu sendiri dan juga ditambahkan dengan variabel `counter[x]` yang berupa perhitungan hasil kiriman dari proses anak melalui `pipe`. 
+     
+   - ```c
+     fprintf(total_file, "Jumlah film horror: %d\n", horror_total);
+     fprintf(total_file, "Jumlah film animasi: %d\n", animasi_total);
+     fprintf(total_file, "Jumlah film drama: %d\n", drama_total);
+     ```
+     Setelah jumlah total _file_ dari tiap genre berhasil didapatkan, maka akan dilakukan pencetakan pada _file_ `total.txt` menggunakan fungsi `fprintf()`. Format penulisan yang ada di `total.txt` sudah disesuaikan dengan ketentuan yang ada, yaitu `Jumlah film <nama_genre>: <jumlah_total>`. 
+     
+   - ```c
+     if(horror_total > animasi_total && horror_total > drama_total){
+         fprintf(total_file, "Genre dengan jumlah film terbanyak: horror\n");
+     }
+     else if(animasi_total > drama_total){
+         fprintf(total_file, "Genre dengan jumlah film terbanyak: animasi\n");
+     }
+     else{
+         fprintf(total_file, "Genre dengan jumlah film terbanyak: drama\n");
+
+     }
+     ```
+     Pada bagian ini, proses induk akan mencari genre apa yang memiliki jumlah _file_ paling banyak dengan percabangan sederhana menggunakan `if else()`. Jika `horror_total` lebih besar dari `animasi_total` dan `drama_total`, maka genre horror akan menjadi yang terbanyak, begitu pun untuk kedua genre lainnya. Genre dengan jumlah _file_ terbanyak akan dicetak di _file_ `total.txt` menggunakan fungsi `fprintf()` sesuai dengan format yang ada.
+     
+   - ```c
+     fclose(total_file);
+     ```
+     Fungsi `fclose()` akan menutup _file_ `total.txt` yang sebelumnya dibuka agar tidak ada kebocoran sumber daya atau hal yang tidak diiginkan lainnya.
+
+```c
+else{
+    perror("fork gagal.\n");
+    return 10;
+}
+```
+Jika `pid` yang dikembalikan oleh fungsi `fork()` tidak bernilai 0 atau lebih dari 0 (`pid < 0`), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi `perror()`, kemudian program akan dihentikan dengan `return 10` sebagai tanda adanya kegagalan.
+
+```c
+return 0;
+```
+Kode diakhiri oleh `return 0` yang menandakan bahwa program telah berhasil dieksekusi tanpa _error_.
 
 ### Foto Hasil Output
 
@@ -863,3 +1010,115 @@ Sesudah:
 ![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.35.54.png?raw=true)
 
 d. trabowo-d.c; Code Lengkap:
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+
+int main(){
+    char *Horror_zip = "/home/ubuntu/sisop_modul_2/resources/FilmHorror.zip";
+    char *Animasi_zip = "/home/ubuntu/sisop_modul_2/resources/FilmAnimasi.zip";
+    char *Drama_zip = "/home/ubuntu/sisop_modul_2/resources/FilmDrama.zip";
+    char* FilmHorror_dir = "/home/ubuntu/sisop_modul_2/resources/FilmHorror";
+    char* FilmAnimasi_dir = "/home/ubuntu/sisop_modul_2/resources/FilmAnimasi";
+    char* FilmDrama_dir = "/home/ubuntu/sisop_modul_2/resources/FilmDrama";
+
+    if(access(Horror_zip, F_OK) == 0 || access(Animasi_zip, F_OK) == 0 || access(Drama_zip, F_OK) == 0){
+        printf("File zip sudah ada.\n");
+        return 0;
+    }
+
+    pid_t pid;
+
+    pid = fork();
+    if(pid == 0){
+        execlp("zip", "zip", "-r", Horror_zip, FilmHorror_dir, NULL);
+        perror("execlp zip FilmHorror gagal.\n");
+        exit(1);
+    }
+    else if(pid < 0){
+        perror("fork zip FilmHorror gagal.\n");
+        return 1;
+    }
+
+    int flag;
+    waitpid(pid, &flag, 0);  
+
+    pid = fork();
+    if(pid == 0){
+        execlp("rm", "rm", "-r", FilmHorror_dir, NULL);  
+        perror("execlp hapus FilmHorror gagal.\n");
+        exit(1);
+    }
+    else if(pid < 0){
+        perror("fork hapus FilmHorror gagal.\n");
+        return 2;
+    }
+
+    waitpid(pid, &flag, 0);
+
+    pid = fork();
+    if(pid == 0){
+        execlp("zip", "zip", "-r", Animasi_zip, FilmAnimasi_dir, NULL);
+        perror("execlp zip FilmAnimasi gagal.\n");
+        exit(1);
+    }
+    else if(pid < 0){
+        perror("fork zip FilmAnimasi gagal.\n");
+        return 3;
+    }
+
+    waitpid(pid, &flag, 0);  
+
+    pid = fork();
+    if(pid == 0){
+        execlp("rm", "rm", "-r", FilmAnimasi_dir, NULL);  
+        perror("execlp hapus FilmAnimasi gagal.\n");
+        exit(1);
+    }
+    else if(pid < 0){
+        perror("fork hapus FilmAnimasi gagal.\n");
+        return 4;
+    }
+
+    waitpid(pid, &flag, 0);
+
+    pid = fork();
+    if(pid == 0){
+        execlp("zip", "zip", "-r", Drama_zip, FilmDrama_dir, NULL);
+        perror("execlp zip FilmDrama gagal.\n");
+        exit(1);
+    }
+    else if(pid < 0){
+        perror("fork zip FilmDrama gagal.\n");
+        return 5;
+    }
+
+    waitpid(pid, &flag, 0); 
+
+    pid = fork();
+    if(pid == 0){
+        execlp("rm", "rm", "-r", FilmDrama_dir, NULL);  
+        perror("execlp hapus FilmDrama gagal.\n");
+        exit(1);
+    }
+    else if(pid < 0){
+        perror("fork hapus FilmDrama gagal.\n");
+        return 6;
+    }
+
+    waitpid(pid, &flag, 0);
+
+    printf("Zip file berhasil dan direktori telah dihapus.\n");
+
+    return 0;
+}
+```
+
+Penjelasan:
+
+```c
+
+```
