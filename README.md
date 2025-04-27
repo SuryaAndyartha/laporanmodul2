@@ -1122,3 +1122,16 @@ Penjelasan:
 ```c
 
 ```
+### Foto Hasil Output
+
+Sebelum:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.27.04.png?raw=true)
+
+Eksekusi program:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.45.48.png?raw=true)
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.46.02.png?raw=true)
+
+Sesudah:
+![image alt](https://github.com/SuryaAndyartha/laporanmodul2/blob/main/Screenshot%202025-04-26%20at%2017.45.34.png?raw=true)
+
+---
