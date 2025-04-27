@@ -130,7 +130,7 @@ Penjelasan:
 #include <sys/wait.h>
 #include <stdlib.h>
 ```
-Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. `#include <stdio.h>` menyediakan akses ke fungsi `printf`. `#include <unistd.h>` memberikan akses ke fungsi `fork`, `execlp`, dan `access`. `#include <sys/wait.h>` menyediakan fungsi `waitpid`, `WIFEXITED`, dan `WEXITSTATUS`. `#include <stdlib.h>` menyediakan fungsi `exit` dan `perror`.
+Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. `#include <stdio.h>` menyediakan akses ke fungsi `printf` dan `perror`. `#include <unistd.h>` memberikan akses ke fungsi `fork`, `execlp`, dan `access`. `#include <sys/wait.h>` menyediakan fungsi `waitpid`, `WIFEXITED`, dan `WEXITSTATUS`. `#include <stdlib.h>` menyediakan fungsi `exit`.
 
 ```c
 int main(){
@@ -620,6 +620,229 @@ int main(){
 
 Penjelasan:
 
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <string.h>
+#include <libgen.h>
+#include <time.h>
+```
+Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. `#include <stdio.h>` menyediakan akses ke fungsi `printf`, `perror`, `fprintf`, dan `sscanf`. `#include <stdlib.h>` menyediakan akses ke fungsi `malloc`, `qsort`, dan `exit`. `#include <sys/stat.h>` menyediakan akses ke fungsi `mkdir`. `#include <sys/wait.h>` menyediakan akses ke fungsi `wait`. #include `<unistd.h>` menyediakan akses ke fungsi `access`, `fork`, `pipe`, `write`, `read`, dan `close`. `#include <dirent.h>` menyediakan akses ke fungsi `opendir`, `readdir`, dan `closedir`. `#include <string.h>` menyediakan akses ke fungsi `strcpy`, `strcat`, dan `strstr`. `#include <libgen.h>` menyediakan akses ke fungsi `basename`. `#include <time.h>` menyediakan akses ke fungsi `time` dan `localtime`.
+
+```c
+int extract_number(const char *filename){
+    const char *base = basename((char *)filename);
+    int number;
+    sscanf(base, "%d_", &number); 
+    return number;
+}
+```
+Fungsi `extract_number()` digunakan untuk mengambil angka di awal nama _file_ sebagai penanda urutan, dengan parameter berupa _string_ nama _file_ (`const char *filename`). Fungsi `basename` akan mengambil bagian nama _file_ saja dari _path_ yang ada. Variabel `number` dideklarasikan sebagai tempat menyimpan angka hasil proses esktraksi. Fungsi `sscanf` digunakan untuk membaca angka dari nama _file_ hingga karakter _underscore_ pertama dengan format `"%d_"`, dan menyimpannya ke dalam variabel `number`. Fungsi kemudian mengembalikan nilai number sebagai hasil. Fungsi ini akan digunakan pada bagian `cmpfunc()` dan `qsort()` untuk mengurutkan nama _file_ secara _ascending_ (dari kecil ke besar), sehingga konteks lebih lanjut akan dijelaskan di bagian tersebut.
+
+```c
+int cmpfunc(const void *a, const void *b){
+    const char *fa = *(const char **)a;
+    const char *fb = *(const char **)b;
+    
+    int na = extract_number(fa);
+    int nb = extract_number(fb);
+
+    return na - nb;
+}
+```
+Fungsi `cmpfunc()` adalah fungsi pembanding atau _comparation_ yang digunakan untuk mengurutkan nama _file_ berdasarkan angka yang didapatkan dari fungsi `extract_number()`. Parameter `a` dan `b` adalah _pointer_ ke dua string yang akan dibandingkan. Setelah fungsi `extract_number()` dipanggil dan berhasil mengekstrak angka dari masing-masing nama _file_, hasil ekstraksi ini disimpan dalam variabel `na` dan `nb`, yang kemudian dibandingkan dengan mengembalikan hasil pengurangan `na - nb`. Fungsi ini akan digunakan pada bagian `qsort()` untuk mengurutkan nama _file_ secara _ascending_ (dari kecil ke besar), sehingga konteks lebih lanjut akan dijelaskan di bagian tersebut.  
+
+```c
+int main(){
+    char* dir_name = "/home/ubuntu/sisop_modul_2/resources/film";
+    char* FilmHorror_dir = "/home/ubuntu/sisop_modul_2/resources/FilmHorror";
+    char* FilmAnimasi_dir = "/home/ubuntu/sisop_modul_2/resources/FilmAnimasi";
+    char* FilmDrama_dir = "/home/ubuntu/sisop_modul_2/resources/FilmDrama";
+    ...
+}
+```
+`int main(){...}` adalah fungsi utama yang menjadi titik masuk eksekusi program. Di dalamnya, program dimulai dan dieksekusi.
+Setelahnya, terdapat bagian yang mendeklarasikan variabel-variabel sebagai _pointer_ dari tipe data `char`. `dir_name` menyimpan _path_ lengkap ke direktori yang berisi film-film yang akan diproses. `FilmHorror_dir`, `FilmAnimasi_dir`, dan `FilmDrama_dir` masing-masing menyimpan _path_ lengkap ke direktori tempat film dengan genre horror, animasi, dan drama akan dipindahkan dari direktori `film` ke masing-masing direktori genrenya setelah diproses.
+
+```c
+if(access(FilmHorror_dir, F_OK) == 0 || access(FilmAnimasi_dir, F_OK) == 0 || access(FilmDrama_dir, F_OK) == 0){
+    printf("Folder genre film sudah dibuat.\n");
+    return 0;
+}
+```
+Potongan kode ini berfungsi untuk memeriksa apakah _folder_ tujuan masing-masing _file_ film sesuai genrenya (`FilmHorror_dir`, `FilmAnimasi_dir`, dan `FilmDrama_dir`) sudah ada atau belum menggunakan fungsi `access()` dengan parameter `F_OK`. Jika _folder_ tersebut ditemukan atau sudah bisa diakses (`access()` mengembalikan 0), maka program mencetak pesan `"Folder genre film sudah dibuat."` dan langsung berhenti dengan `return 0`, yang menandakan bahwa program selesai dengan sukses tanpa perlu melakukan proses pemindahan _file_. Dengan menggunakan operator logika `OR`, kode bisa memastikan bahwa program akan berhenti jika salah satu _folder_ saja sudah dibuat.
+
+```c
+if(mkdir(FilmHorror_dir, 0777) == -1){
+    printf("mkdir FilmHorror gagal.\n");
+    return 1;
+} 
+if(mkdir(FilmAnimasi_dir, 0777) == -1){
+    printf("mkdir FilmAnimasi gagal.\n");
+    return 2;
+}
+if(mkdir(FilmDrama_dir, 0777) == -1){
+    printf("mkdir FilmDrama gagal.\n");
+    return 3;
+}
+```
+Bagian ini berfungsi untuk membuat tiga direktori baru dengan nama `FilmHorror`, `FilmAnimasi`, dan `FilmDrama` menggunakan fungsi `mkdir`. `mkdir` berisi nama direktori itu sendiri di parameter pertama dan angka `0777` di parameter kedua yang menunjukkan hak akses penuh (`read`, `write`, `execute`) untuk pengguna. Jika pembuatan direktori gagal (`mkdir` akan mengembalikan nilai `-1` atau ditulis `mkdir(...) == -1`), maka program akan mencetak pesan kesalahan. Program mencetak pesan `"mkdir <nama_direktori> gagal."` menggunakan `printf()` dan menghentikan eksekusi program dengan `return 1` sebagai tanda adanya kegagalan. (Nilai `return` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
+
+```c
+DIR *dir = opendir(dir_name);
+if(dir == NULL){
+    printf("File unzip belum ada.\n");
+    return 4;
+}
+```
+Bagian kode ini digunakan untuk membuka direktori yang telah ditentukan dalam variabel `dir_name` menggunakan fungsi `opendir()`. `opendir()` mengembalikan pointer ke tipe data `DIR`. Jika `opendir()` gagal membuka direktori (misalnya karena direktori tidak ada atau tidak dapat diakses), maka nilai yang dikembalikan adalah `NULL`. Dalam kasus ini, program mencetak pesan `"File unzip belum ada."` menggunakan `printf()` dan menghentikan eksekusi program dengan `return 4` sebagai tanda adanya kegagalan.
+
+```c
+char *film_array[100];
+int film_counter = 0;
+```
+Di sini, dilakukan deklarasi sebuah _array_ `film_array` yang berukuran `100` elemen dengan tipe data `char*`, yang masing-masing elemen akan menyimpan _pointer_ ke _string_. _Array_ ini digunakan untuk menyimpan nama-nama _file_ film yang ditemukan dalam direktori. Variabel `film_counter` diinisialisasi dengan nilai `0`, yang akan digunakan untuk menghitung jumlah _file_ film (dalam hal ini file dengan ekstensi .jpg).
+
+```c
+struct dirent* entity;
+entity = readdir(dir);
+```
+Potongan kode ini mendeklarasikan sebuah _pointer_ `entity` bertipe `struct dirent`, yang digunakan untuk menyimpan informasi tentang entri dalam direktori. Kemudian, dilakukan pemanggilan fungsi `readdir()` untuk membaca entri pertama dalam direktori yang akan disimpan ke `entity`. Pemanggilan fungsi dilakukan oleh `entity = readdir(dir)`.
+
+
+```c
+while(entity != NULL){
+    if(strstr(entity->d_name, ".jpg") != NULL){
+        char *path_file = malloc(512);
+        if(path_file == NULL){
+            printf("malloc gagal.\n");
+            return 5;
+        }
+
+        strcpy(path_file, dir_name);
+        strcat(path_file, "/");
+        strcat(path_file, entity->d_name);
+
+        film_array[film_counter] = path_file;
+        film_counter++;
+    }
+    entity = readdir(dir);
+}
+```
+Pada bagian ini, terjadi perulangan atau _loop_ menggunakan `while()`. _Looping_ akan terus berjalan selama `entity` tidak bernilai `NULL` (masih ada entri di dalam direktori). Di dalam _loop_, fungsi `strstr()` digunakan untuk memeriksa apakah nama _file_ yang ada pada `entity->d_name` mengandung _substring_ `".jpg"`. Jika kondisi tersebut terpenuhi, maka program akan mengalokasikan memori untuk menyimpan _path file_ dengan `malloc(512)`. Jika alokasi memori gagal (ditandai dengan `path_file` bernilai `NULL)`, program akan mencetak pesan kesalahan dan menghentikan program dengan `return 5`. Setelah itu, `strcpy` digunakan untuk menyalin _path_ direktori ke `path_file`, diikuti dengan `strcat` untuk menambahkan simbol `/` dan nama _file_ yang ditemukan pada direktori. _Path_ lengkap file kemudian disimpan ke dalam _array_ `film_array` pada indeks yang sesuai dengan `film_counter`, yang kemudian dilakukan _increment_. Setelah itu, terjadi pemanggilan ulang fungsi `readdir()` oleh `entity = readdir(dir)` untuk memproses entri berikutnya. 
+
+```c
+closedir(dir)
+```
+Fungsi `closedir()` digunakan untuk menutup direktori yang sebelumnya dibuka `opendir()` sehingga tidak ada kebocoran memori atau masalah lain yang mungkin muncul. 
+
+```c
+qsort(film_array, film_counter, sizeof(char *), cmpfunc);
+```
+Fungsi `qsort()` dipanggil untuk mengurutkan _array_ `film_array` berdasarkan fungsi pembanding `cmpfunc()`. Parameter pertama adalah _array_ yang akan diurutkan, yaitu `film_array`. Parameter kedua adalah jumlah elemen dalam _array_, yaitu `film_counter`. Parameter ketiga, `sizeof(char *)`, memberikan ukuran tiap elemen _array_ (_string pointer_). Parameter keempat adalah fungsi pembanding `cmpfunc()`.
+
+```c
+int fd[2];
+if(pipe(fd) == -1){
+    perror("pipe gagal.\n");
+    return 8;
+}
+```
+Bagian ini mendeklarasikan sebuah array penyimpan _file descriptor_ (`fd[2]`) dari `pipe` untuk memungkinkan komunikasi antarproses. _Array_ memiliki ukuran sebanyak 2, `fd[0]` digunakan untuk membaca data dari `pipe` dan `fd[1]` bertujuan untuk menulis data ke `pipe`. Jika pembuatan `pipe` gagal (ditandai dengan nilai kembalian `-1`), maka program akan mencetak pesan kesalahan menggunakan `perror` dan mengembalikan nilai dengan `return 8`.
+
+```c
+pid_t pid = fork();
+```
+Program akan membuat proses baru menggunakan fungsi `fork()`. `fork()` akan menggandakan proses: satu untuk _parent_ dan satu untuk _child_. 
+
+```c
+if(pid == 0){
+    ...
+}
+```
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka bagian ini akan dijalankan oleh proses anak atau _child_. Proses anak akan melakukan:
+
+   - ```c
+     int horror_count = 0, animasi_count = 0, drama_count = 0;
+     ```
+     [penjelasan]
+   - ```c
+     FILE *recap_file = fopen("/home/ubuntu/sisop_modul_2/resources/recap.txt", "a");
+     if(recap_file == NULL){
+         perror("Membuka recap.txt oleh Peddy gagal.\n");
+         return 6;
+     }
+     ```
+     [penjelasan]
+   - ```c
+     for(int i = film_counter - 1; i >= film_counter / 2; i--){
+         char *oldpath = film_array[i];
+         char newpath[512];
+         char dirpath[512];
+         ...
+     }
+     ```
+     [penjelasan]
+   - ```c
+     if(strstr(film_array[i], "horror") != NULL){
+         strcpy(newpath, FilmHorror_dir);
+         strcpy(dirpath, FilmHorror_dir);
+         horror_count++;
+     }
+     else if(strstr(film_array[i], "animasi") != NULL){
+         strcpy(newpath, FilmAnimasi_dir);
+         strcpy(dirpath, FilmAnimasi_dir);
+         animasi_count++;
+     }
+     else if(strstr(film_array[i], "drama") != NULL){
+         strcpy(newpath, FilmDrama_dir);
+         strcpy(dirpath, FilmDrama_dir);
+         drama_count++;
+     }
+     ```
+     [penjelasan]
+   - ```c
+     strcat(newpath, "/");
+     strcat(newpath, basename(film_array[i]));
+     ```
+     [penjelasan]
+   - ```c
+     time_t t = time(NULL);
+     struct tm date = *localtime(&t);
+     ```
+     [penjelasan]
+   - ```c
+     if(rename(oldpath, newpath) == 0){
+         fprintf(recap_file, "[%02d-%02d-%d %02d:%02d:%02d] Peddy: %s telah dipindahkan ke %s\n", 
+             date.tm_mday, date.tm_mon + 1, date.tm_year + 1900, date.tm_hour, date.tm_min, date.tm_sec, basename(film_array[i]), basename(dirpath));
+     }  
+     else{
+         perror("rename gagal");
+     }
+     ```
+     [penjelasan]
+   - ```c
+     fclose(recap_file);
+     ```
+     [penjelasan]
+   - ```c
+     close(fd[0]);  
+     int counter[3] = {horror_count, animasi_count, drama_count};
+     write(fd[1], counter, sizeof(counter)); 
+     close(fd[1]);
+     ```
+     [penjelasan]
+
+```c
+if(pid > 0){
+    ...
+}
+```
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai lebih dari 0 (`pid > 0`), maka bagian ini akan dijalankan oleh proses induk atau _parent_. Proses induk akan melakukan:
 
 ### Foto Hasil Output
 
