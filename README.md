@@ -1120,8 +1120,152 @@ int main(){
 ### Penjelasan:
 
 ```c
-
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
 ```
+Kode dimulai oleh beberapa _library_ penting untuk menjalankan program sesuai yang diinginkan. `#include <stdio.h>` menyediakan akses ke fungsi `printf` dan `perror`. `#include <unistd.h>` memberikan akses ke fungsi `fork`, `execlp`, dan `access`. `#include <sys/wait.h>` menyediakan fungsi `waitpid`. `#include <stdlib.h>` menyediakan fungsi `exit`.
+
+```c
+int main(){
+    char *Horror_zip = "/home/ubuntu/sisop_modul_2/resources/FilmHorror.zip";
+    char *Animasi_zip = "/home/ubuntu/sisop_modul_2/resources/FilmAnimasi.zip";
+    char *Drama_zip = "/home/ubuntu/sisop_modul_2/resources/FilmDrama.zip";
+    char* FilmHorror_dir = "/home/ubuntu/sisop_modul_2/resources/FilmHorror";
+    char* FilmAnimasi_dir = "/home/ubuntu/sisop_modul_2/resources/FilmAnimasi";
+    char* FilmDrama_dir = "/home/ubuntu/sisop_modul_2/resources/FilmDrama";
+    ...
+}
+```
+`int main(){...}` adalah fungsi utama yang menjadi titik masuk eksekusi program. Di dalamnya, program dimulai dan dieksekusi.
+Setelahnya, terdapat bagian yang mendeklarasikan variabel-variabel sebagai _pointer_ dari tipe data `char`. `<nama_genre>_zip` adalah _path_ untuk _file_ `Film<nama_genre>.zip` yang akan dilakukan `zip`. `Film<nama_genre>_dir` adalah direktori tujuan dari masing-masing _file ZIP_ yang akan dilakukan `zip` tersebut. 
+
+```c
+if(access(Horror_zip, F_OK) == 0 || access(Animasi_zip, F_OK) == 0 || access(Drama_zip, F_OK) == 0){
+    printf("File zip sudah ada.\n");
+    return 0;
+}
+```
+Potongan kode ini berfungsi untuk memeriksa apakah _file ZIP_ masing-masing film sesuai genrenya (`Horror_zip`, `Animasi_zip`, dan `Drama_zip`) sudah ada atau belum menggunakan fungsi `access()` dengan parameter `F_OK`. Jika _file ZIP_ tersebut ditemukan atau sudah bisa diakses (`access()` mengembalikan 0), maka program mencetak pesan `"File zip sudah ada."` dan langsung berhenti dengan `return 0`, yang menandakan bahwa program selesai dengan sukses tanpa perlu melakukan proses `zip`. Dengan menggunakan operator logika `OR`, kode bisa memastikan bahwa program akan berhenti jika salah satu _file_ saja sudah bisa diakses.
+
+---
+Bagian kode di bawah ini digunakan untuk ketiga kasus genre, yaitu horror, animasi, dan drama.
+
+```c
+pid_t pid;
+```
+Bagian ini adalah deklarasi sebuah variabel bernama `pid` dengan tipe data `pid_t`. Tipe data `pid_t` digunakan untuk menyimpan `ID` (identifikasi) dari proses dalam sistem operasi. 
+
+```c
+pid = fork();
+```
+Program akan membuat proses baru menggunakan fungsi `fork()`. `fork()` akan menggandakan proses: satu untuk _parent_ dan satu untuk _child_. 
+
+```c
+if(pid == 0){
+    execlp("zip", "zip", "-r", Horror_zip, FilmHorror_dir, NULL);
+    perror("execlp zip FilmHorror gagal.\n");
+    exit(1);
+}
+```
+```c
+if(pid == 0){
+    execlp("zip", "zip", "-r", Animasi_zip, FilmAnimasi_dir, NULL);
+    perror("execlp zip FilmAnimasi gagal.\n");
+    exit(1);
+}
+```
+```c
+if(pid == 0){
+    execlp("zip", "zip", "-r", Drama_zip, FilmDrama_dir, NULL);
+    perror("execlp zip FilmDrama gagal.\n");
+    exit(1);
+}
+```
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka bagian ini akan dijalankan oleh proses anak atau _child_. Fungsi `execlp()` digunakan untuk menggantikan proses anak dengan program baru, dalam hal ini perintah `zip`. `execlp("zip", "zip", "-r", <nama_genre>_zip, <nama_genre>_dir, NULL)` memiliki beberapa parameter. Parameter pertama, `"zip"`, adalah perintah yang akan dijalankan. Parameter kedua, `"zip"`, adalah argumen pertama yang diteruskan (biasanya nama perintah itu sendiri). Parameter ketiga, `"-r"`, adalah opsi yang memberitahu perintah `zip` untuk melakukan pengarsipan secara rekursif, yakni melakukan kompres seluruh isi dari direktori. Parameter keempat, `<nama_genre>_zip`, adalah nama _file output_ untuk arsip `zip` yang akan dibuat. Parameter kelima, `<nama_genre>_dir`, adalah direktori yang akan diarsipkan. `NULL` menandakan akhir dari daftar argumen. Jika `execlp()` gagal, maka pesan _error_ akan dicetak oleh `perror()` dan proses anak tersebut berhenti dengan fungsi `exit(1)`.
+
+```c
+else if(pid < 0){
+    perror("fork zip FilmHorror gagal.\n");
+    return 1;
+}
+```
+```c
+else if(pid < 0){
+    perror("fork zip FilmAnimasi gagal.\n");
+    return 3;
+}
+```
+```c
+else if(pid < 0){
+    perror("fork zip FilmDrama gagal.\n");
+    return 5;
+}
+```
+Jika `pid` yang dikembalikan oleh fungsi `fork()` tidak bernilai 0 atau lebih dari 0 (`pid < 0`), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi `perror()`, kemudian program akan dihentikan dengan `return x` sebagai tanda adanya kegagalan. (Nilai `return` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
+
+```c
+if(pid == 0){
+    execlp("rm", "rm", "-r", FilmHorror_dir, NULL);  
+    perror("execlp hapus FilmHorror gagal.\n");
+    exit(1);
+}
+```
+```c
+if(pid == 0){
+    execlp("rm", "rm", "-r", FilmAnimasi_dir, NULL);  
+    perror("execlp hapus FilmAnimasi gagal.\n");
+    exit(1);
+}
+```
+```c
+if(pid == 0){
+    execlp("rm", "rm", "-r", FilmDrama_dir, NULL);  
+    perror("execlp hapus FilmDrama gagal.\n");
+    exit(1);
+}
+```
+Jika `pid` yang dikembalikan oleh fungsi `fork()` bernilai 0 (`pid == 0`), maka bagian ini akan dijalankan oleh proses anak atau _child_. Fungsi `execlp()` digunakan untuk menggantikan proses anak dengan program baru, dalam hal ini perintah `rm`. `execlp("rm", "rm", "-r", <nama_genre>_dir, NULL)` memiliki beberapa parameter. Parameter pertama, `"rm"`, adalah perintah yang akan dijalankan, yang digunakan untuk menghapus _file_ atau direktori. Parameter kedua, `"rm"`, adalah argumen pertama yang diteruskan (biasanya nama perintah itu sendiri). Parameter ketiga, `"-r"`, adalah opsi yang memberitahu perintah `rm` untuk menghapus direktori beserta isinya secara rekursif. Parameter keempat, `<nama_genre>_dir`, adalah direktori yang akan dihapus. `NULL` menandakan akhir dari daftar argumen. Jika `execlp()` gagal, maka pesan _error_ akan dicetak oleh `perror()` dan proses anak tersebut berhenti dengan fungsi `exit(1)`.
+
+```c
+else if(pid < 0){
+    perror("fork hapus FilmHorror gagal.\n");
+    return 2;
+}
+```
+```c
+else if(pid < 0){
+    perror("fork hapus FilmAnimasi gagal.\n");
+    return 4;
+}
+```
+```c
+else if(pid < 0){
+    perror("fork hapus FilmDrama gagal.\n");
+    return 6;
+}
+```
+Jika `pid` yang dikembalikan oleh fungsi `fork()` tidak bernilai 0 atau lebih dari 0 (`pid < 0`), maka _forking_ gagal dijalankan dan pesan kesalahan akan dicetak oleh fungsi `perror()`, kemudian program akan dihentikan dengan `return x` sebagai tanda adanya kegagalan. (Nilai `return` yang berbeda hanya digunakan untuk memudahkan pemeriksaan kesalahan/_debugging_).
+
+```c
+int flag;
+waitpid(pid, &flag, 0); 
+```
+Bagian ini mendeklarasi variabel _integer_ `flag` yang akan digunakan untuk menyimpan status keluar dari proses anak. Fungsi `waitpid(pid, &flag, 0)` digunakan oleh proses induk untuk menunggu proses anak yang memiliki `ID` `pid` selesai dieksekusi. Fungsi ini juga menyimpan status keluar dari proses anak dalam variabel `flag`. Parameter ketiga, `0`, menunjukkan bahwa `waitpid()` akan menunggu proses anak yang telah selesai tanpa adanya pengaturan khusus.
+
+Di kode ini, proses induk tidak melakukan eksekusi apa pun, hanya menunggu atau mengatur tiap proses anak yang diciptakan oleh _forking_ secara benar. 
+
+```c
+printf("Zip file berhasil dan direktori telah dihapus.\n");
+```
+Setelah semua bagian selesai dan berhasil dijalankan, maka program akan mencetak pesan keberhasilan menggunakan fungsi `printf()`.
+
+```c
+return 0;
+```
+Kode diakhiri oleh `return 0` yang menandakan bahwa program telah berhasil dieksekusi tanpa _error_.
+
 ### Foto Hasil Output
 
 Sebelum:
